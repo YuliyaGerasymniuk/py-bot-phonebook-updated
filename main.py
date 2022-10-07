@@ -2,7 +2,7 @@ from collections import UserDict
 
 
 class Field:
-    def __init__(self, value) -> None:
+    def __init__(self, value):
         self.value = value
 
     def __str__(self) -> str:
@@ -18,43 +18,44 @@ class Phone(Field):
 
 
 class Record:
-    def __init__(self, name, phones=None) -> None:
+    def __init__(self, name, phones=None):
         self.name = Name(name)
         self.phones = phones
 
     def __str__(self) -> str:
         return f'User {self.name} - Phones: {", ".join([phone.value for phone in self.phones])}'
 
-    def add_phone(self, phone) -> None:
-        phone = Phone(phone)
-        self.phones.append(phone)
+    def add_phone(self, phone):
+        self.phones.append(Phone(phone))
 
-    def del_phone(self, phone) -> None:
-        phone = Phone(phone)
-        for i in self.phones:
-            if i:
+    def del_phone(self, new_phone) -> bool:
+        for phone in self.phones:
+            if phone.value == new_phone:
                 self.phones.remove(phone)
+                return True
 
-    def edit_phone(self, phone, new_phone) -> None:
-        del_phone(phone)
-        new_phone = Phone(new_phone)
-        self.phones.append(new_phone)
+    def edit_phone(self, old_phone, new_phone):
+        for phone in self.phones:
+            if phone.value == old_phone:
+                self.add_phone(new_phone)
+                self.phones.remove(phone)
+                return True
 
 
 class AddressBook(UserDict):
-    def add_record(self, record: Record) -> None:
+    def add_record(self, record: Record):
         self.data[record.name.value] = record
 
 
-def input_error(contacts, *args):
-    try:
-        return input_error(contacts, *args)
-    except IndexError:
-        return 'Error! Give me name and phone please!'
-    except KeyError:
-        return 'Error! User not found!'
-    except ValueError:
-        return 'Error! Phone number is incorrect!'
+def input_error(func):
+    def wrapper(*args, **kwargs):
+        try:
+            result = func(*args, **kwargs)
+        except (KeyError, ValueError, IndexError):
+            print("Repeat and enter correct user name and phone")
+        else:
+            return result
+    return wrapper
 
 
 def greeting():
@@ -109,8 +110,12 @@ def unknown_command():
     return 'Unknown command! Enter again!'
 
 
-COMMANDS = {greeting: ['hello'], add: ['add '], change: ['change '], phone: ['phone '],
-            show_all: ['show all'], exiting: ['good bye', 'close', 'exit', '.'],
+COMMANDS = {greeting: ['hello'],
+            add: ['add '],
+            change: ['change '],
+            phone: ['phone '],
+            show_all: ['show all'],
+            exiting: ['good bye', 'close', 'exit', '.'],
             del_phone: ['del ']}
 
 
